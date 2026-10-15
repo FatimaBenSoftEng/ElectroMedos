@@ -1,0 +1,37 @@
+.rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stars {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.row {
+  display: flex;
+  white-space: nowrap;
+  color: #d9dee7; /* étoiles vides */
+}
+
+.row svg {
+  flex: none;
+  width: var(--star-size, 14px);
+  height: var(--star-size, 14px);
+  fill: currentColor;
+}
+
+.filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  color: #fbbf24; /* étoiles pleines */
+}
+
+.count {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}

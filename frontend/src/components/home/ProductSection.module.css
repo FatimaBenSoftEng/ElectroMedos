@@ -1,0 +1,84 @@
+.section {
+  padding: 3rem 0;
+}
+
+.alt {
+  background: var(--color-surface);
+}
+
+/* ---------- En-tête centré ---------- */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto 2rem;
+  max-width: 640px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.eyebrow::before,
+.eyebrow::after {
+  content: '';
+  width: 36px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.header h2 {
+  font-size: 2rem;
+  line-height: 1.2;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+.header p {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ---------- Lien "Voir tout" avec bordure ---------- */
+.footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.viewAll {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 1.75rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 999px;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition), color var(--transition);
+}
+
+.viewAll:hover {
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .header h2 {
+    font-size: 1.5rem;
+  }
+}

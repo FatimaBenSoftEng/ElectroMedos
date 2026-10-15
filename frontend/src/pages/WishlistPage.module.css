@@ -1,0 +1,13 @@
+.page {
+  padding-top: 2rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 4rem 0;
+  color: var(--color-text-muted);
+}
+
+.empty .btn {
+  margin-top: 1rem;
+}

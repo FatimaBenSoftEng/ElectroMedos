@@ -1,0 +1,369 @@
+/* ===== Checkout (CSS Module) — style inspiré de la maquette ShopZen ===== */
+.page {
+  --co-blue: #1d5fd8;
+  --co-blue-soft: #f3f7ff;
+  --co-ink: #0f1b33;
+  --co-muted: #5b6678;
+  --co-line: #e3e8ef;
+  --co-green: #1a9d57;
+  color: var(--co-ink);
+}
+
+/* ---------- Mise en page ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 32px;
+  align-items: start;
+}
+.title {
+  font-size: 2rem;
+  margin: 0 0 6px;
+  font-weight: 800;
+}
+.subtitle {
+  color: var(--co-muted);
+  margin: 0 0 24px;
+}
+
+/* ---------- Formulaire livraison ---------- */
+.panel {
+  background: #fff;
+  border: 1px solid var(--co-line);
+  border-radius: 12px;
+  padding: 24px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.grid label,
+.cardFields label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.full {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Moyens de paiement ---------- */
+.methods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.method {
+  background: #fff;
+  border: 1px solid var(--co-line);
+  border-radius: 10px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.method.isSelected {
+  border-color: var(--co-blue);
+  background: var(--co-blue-soft);
+  box-shadow: 0 0 0 1px var(--co-blue);
+}
+.methodHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+}
+.methodHead input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.methodRadio {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #c3cad6;
+  background: #fff;
+  display: grid;
+  place-items: center;
+}
+.method.isSelected .methodRadio {
+  border-color: var(--co-blue);
+}
+.method.isSelected .methodRadio::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--co-blue);
+}
+.methodHead input:focus-visible + .methodRadio {
+  outline: 3px solid rgba(29, 95, 216, 0.35);
+  outline-offset: 2px;
+}
+.methodIcon {
+  flex: none;
+  width: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--co-ink);
+}
+.methodText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.methodText small {
+  color: var(--co-muted);
+}
+.methodBadge {
+  flex: none;
+}
+
+/* Fausses marques (texte/CSS, remplacez par vos vrais logos SVG si besoin) */
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.badgeVisa {
+  font-style: italic;
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: #1a3a9c;
+  letter-spacing: -0.5px;
+}
+.badgeMc {
+  display: inline-flex;
+}
+.badgeMc i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #eb001b;
+}
+.badgeMc i + i {
+  background: #f79e1b;
+  margin-left: -9px;
+  mix-blend-mode: multiply;
+}
+.badgeAmex {
+  background: #1f72cd;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 10px 8px;
+  border-radius: 4px;
+}
+.brand {
+  font-weight: 900;
+  font-size: 1.6rem;
+  font-style: italic;
+}
+.brandPaypal {
+  color: #1a3a9c;
+}
+.brandApple {
+  font-style: normal;
+}
+.brandBancontact {
+  width: 30px;
+  height: 22px;
+  background: linear-gradient(160deg, #0a4ea3 55%, #ffd800 55%);
+  border-radius: 3px;
+  transform: skewX(-12deg);
+}
+.textBadge {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+.textBadgePaypal {
+  color: #1a5fb4;
+  font-style: italic;
+}
+.textBadgeApple {
+  background: #000;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.textBadgeBancontact {
+  color: #0a4ea3;
+  font-size: 0.95rem;
+}
+
+/* Champs carte */
+.cardFields {
+  display: grid;
+  grid-template-columns: 2fr 1.1fr 1fr;
+  gap: 18px 22px;
+  margin: 0 20px;
+  padding: 20px 0 22px;
+  border-top: 1px solid var(--co-line);
+}
+.cardFieldsHolder {
+  grid-column: 1 / -1;
+}
+
+/* Retour */
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--co-blue);
+  font-weight: 500;
+  cursor: pointer;
+}
+.back:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Récapitulatif ---------- */
+.summary {
+  background: #f8fafc;
+  border: 1px solid var(--co-line);
+  border-radius: 12px;
+  padding: 26px 26px 28px;
+  position: sticky;
+  top: 24px;
+}
+.summary h2 {
+  margin: 0 0 20px;
+  font-size: 1.35rem;
+}
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--co-line);
+  margin-bottom: 16px;
+}
+.itemImg {
+  flex: none;
+  width: 94px;
+  height: 94px;
+  border-radius: 10px;
+  background: #e9edf3;
+  overflow: hidden;
+}
+.itemImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.itemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}
+.itemInfo small {
+  color: var(--co-muted);
+}
+.itemPrice {
+  font-weight: 600;
+  padding-top: 6px;
+}
+.lines > div {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.free {
+  color: var(--co-green);
+  font-weight: 600;
+}
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0 22px;
+  border-top: 1px solid var(--co-line);
+  border-bottom: 1px solid var(--co-line);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.total strong {
+  font-size: 1.3rem;
+}
+.guarantees {
+  list-style: none;
+  margin: 22px 0 26px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.guarantees li {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.guarantees li > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.guarantees div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.guarantees small {
+  color: var(--co-muted);
+}
+.pay {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--co-blue);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pay:hover:not(:disabled) {
+  background: #174cb0;
+}
+.pay:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .summary {
+    position: static;
+  }
+}
+@media (max-width: 600px) {
+  .grid,
+  .cardFields {
+    grid-template-columns: 1fr;
+  }
+  .methodHead {
+    flex-wrap: wrap;
+  }
+  .methodBadge {
+    margin-left: 82px;
+  }
+}

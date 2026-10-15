@@ -1,0 +1,390 @@
+.adminPage {
+  padding: 24px;
+}
+
+.adminPageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.adminPageSubtitle {
+  color: #6b7280;
+}
+
+.adminBtn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+.adminBtnPrimary {
+  background: #6C5CE7;
+  color: #fff;
+}
+
+/* Cartes statistiques très petites */
+.adminStats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1024px) {
+  .adminStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .adminStats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.adminStatCard {
+  padding: 10px 14px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  border: 1px solid #f0f0f0;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.adminStatCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #6b7280;
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+.adminStatCardLabel {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 9px;
+}
+
+.adminStatCardIcon {
+  font-size: 14px;
+}
+
+.adminStatCardValue {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+  margin: 1px 0;
+  line-height: 1.2;
+}
+
+.adminStatCardChange {
+  color: #16a34a;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+  .adminGrid { grid-template-columns: 1fr; }
+}
+
+.adminPanel {
+  padding: 20px;
+}
+.adminPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.adminLink {
+  font-size: 13px;
+  color: #6C5CE7;
+  text-decoration: none;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.adminTable th {
+  text-align: left;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 8px 6px;
+  border-bottom: 1px solid #eee;
+}
+.adminTable td {
+  padding: 10px 6px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.adminTableId {
+  color: #6C5CE7;
+  font-weight: 600;
+}
+
+.adminBadge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.statusDelivered  { background: #dcfce7; color: #16a34a; }
+.statusShipped    { background: #dbeafe; color: #2563eb; }
+.statusPreparing  { background: #fef3c7; color: #d97706; }
+.statusPending    { background: #f3f4f6; color: #6b7280; }
+.statusCancelled  { background: #fee2e2; color: #dc2626; }
+
+.adminTopProducts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.adminTopProducts li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.adminTopProductsRank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.adminTopProductsInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.adminTopProductsName {
+  font-weight: 600;
+  font-size: 14px;
+}
+.adminTopProductsSales {
+  font-size: 12px;
+  color: #6b7280;
+}
+.adminTopProductsTotal {
+  font-weight: 600;
+}
+
+/* Quick access cards - suppression des lignes au survol */
+.adminCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.adminCard {
+  padding: 20px;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* Suppression de toute décoration au survol */
+.adminCard:hover {
+  background: #fff;
+  border-color: #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.adminCard:focus,
+.adminCard:active {
+  text-decoration: none;
+  outline: none;
+}
+
+.adminCardIcon {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.adminCard h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e1b3a;
+}
+
+.adminCard p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.adminPageActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dateRangeBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+/* Ajouter ces styles à la fin du fichier */
+
+/* Date Picker */
+.dateRangeWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.datePickerDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid #eee;
+  padding: 20px;
+  min-width: 280px;
+  z-index: 1000;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.datePickerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.datePickerGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.datePickerGroup label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dateInput {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  width: 100%;
+}
+
+.dateInput:focus {
+  border-color: #6C5CE7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.datePickerActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.datePickerApplyBtn {
+  flex: 1;
+  padding: 8px 16px;
+  background: #6C5CE7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.datePickerApplyBtn:hover {
+  background: #5a4bd1;
+}
+
+.datePickerCancelBtn {
+  flex: 1;
+  padding: 8px 16px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.datePickerCancelBtn:hover {
+  background: #e5e7eb;
+}
+
+/* Responsive pour le date picker */
+@media (max-width: 768px) {
+  .datePickerDropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 300px;
+    max-width: 90%;
+  }
+  
+  .datePickerActions {
+    flex-direction: column;
+  }
+}
+[data-theme="dark"] .adminPageHeader h1 {
+  color: var(--text-primary);
+}

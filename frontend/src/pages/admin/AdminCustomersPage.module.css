@@ -1,0 +1,605 @@
+/* Supprimer .colId et .colId:first-child */
+
+.adminCustomersPage {
+  padding: 24px;
+}
+
+.adminPageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.adminPageHeader h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1e1b3a;
+  margin: 0 0 4px 0;
+}
+
+.adminPageSubtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.statsBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #ede9fe;
+  border-radius: 12px;
+}
+
+.statsBadgeNumber {
+  font-size: 20px;
+  font-weight: 700;
+  color: #6C5CE7;
+}
+
+.statsBadgeLabel {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Toolbar */
+.adminToolbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.adminToolbarField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.adminInput {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.adminInput:focus {
+  border-color: #6C5CE7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.adminSelect {
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adminSelect:focus {
+  border-color: #6C5CE7;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+/* Pagination Info */
+.paginationInfo {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+/* Table - Pleine largeur */
+.adminCustomersLayout {
+  display: block;
+}
+
+.tableWrapper {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.adminTable thead {
+  background: #f8f9fb;
+}
+
+.adminTable thead th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.adminTable tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+}
+
+.adminTable tbody tr {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.adminTable tbody tr:hover {
+  background: #fafafa;
+}
+
+.rowActive {
+  background: rgba(108, 92, 231, 0.08);
+}
+
+/* Customer Cell avec Avatar */
+.customerCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.customerAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.statusActive {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.statusInactive {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Supprimer la sidebar de détail */
+.adminCustomersDetail {
+  display: none;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.paginationBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.paginationPages {
+  display: flex;
+  gap: 4px;
+}
+
+.paginationPage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.paginationPage:hover:not(.paginationPageActive) {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.paginationPageActive {
+  background: #6C5CE7;
+  border-color: #6C5CE7;
+  color: #fff;
+}
+
+.paginationDots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 580px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modalHeader h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e1b3a;
+  margin: 0;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.modalClose:hover {
+  background: #f3f4f6;
+  color: #1e1b3a;
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.modalUserHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 20px;
+}
+
+.modalUserAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6C5CE7, #a29bfe);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.modalUserInfo h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e1b3a;
+  margin: 0 0 4px 0;
+}
+
+.modalUserBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modalUserRole {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.modalSection {
+  margin-bottom: 20px;
+}
+
+.modalSection:last-child {
+  margin-bottom: 0;
+}
+
+.modalSectionTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.modalInfoGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modalInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.modalInfoRow:last-child {
+  border-bottom: none;
+}
+
+.modalInfoLabel {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.modalInfoValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e1b3a;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+.modalInfoRow .statusBadge {
+  font-size: 13px;
+  padding: 3px 14px;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.modalActionBtn {
+  padding: 10px 24px;
+  background: #6C5CE7;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modalActionBtn:hover:not(:disabled) {
+  background: #5a4bd1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+}
+
+.modalActionBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modalCloseBtn {
+  padding: 10px 24px;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modalCloseBtn:hover {
+  background: #e5e7eb;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .adminCustomersLayout {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .adminCustomersPage {
+    padding: 16px;
+  }
+
+  .adminPageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .adminToolbar {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+  }
+
+  .adminTable {
+    font-size: 12px;
+  }
+
+  .adminTable thead th,
+  .adminTable tbody td {
+    padding: 8px 10px;
+  }
+
+  .customerCell {
+    gap: 8px;
+  }
+
+  .customerAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .paginationBtn {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .paginationPage {
+    min-width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .modalContent {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .modalUserHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .modalHeader {
+    padding: 16px 20px;
+  }
+
+  .modalBody {
+    padding: 16px 20px;
+  }
+
+  .modalFooter {
+    padding: 12px 20px;
+    flex-direction: column;
+  }
+
+  .modalActionBtn,
+  .modalCloseBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modalInfoRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .modalInfoValue {
+    text-align: left;
+    max-width: 100%;
+  }
+}

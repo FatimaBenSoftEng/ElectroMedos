@@ -1,0 +1,66 @@
+/* ---------- Rythme vertical commun à toutes les sections ---------- */
+.section {
+  padding-block: clamp(3rem, 6vw, 5.5rem);
+}
+.sectionAlt {
+  background: var(--home-alt-bg, rgba(0, 0, 0, 0.03));
+}
+
+/* ---------- Révélation au scroll (sobre : fondu + léger décalage) ---------- */
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.isVisible {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+  Cascade sur les cartes : ajoutez la classe globale "stagger" à la grille
+  de ProductSection (className="... stagger"). Elle reste en :global pour
+  pouvoir être utilisée depuis un autre composant.
+*/
+.reveal :global(.stagger) > * {
+  opacity: 0;
+  transform: translate3d(0, 20px, 0);
+  transition:
+    opacity 0.55s ease calc(var(--i, 0) * 70ms + 150ms),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) calc(var(--i, 0) * 70ms + 150ms);
+}
+.isVisible :global(.stagger) > * {
+  opacity: 1;
+  transform: none;
+}
+:global(.stagger) > *:nth-child(1) { --i: 0; }
+:global(.stagger) > *:nth-child(2) { --i: 1; }
+:global(.stagger) > *:nth-child(3) { --i: 2; }
+:global(.stagger) > *:nth-child(4) { --i: 3; }
+:global(.stagger) > *:nth-child(5) { --i: 4; }
+:global(.stagger) > *:nth-child(6) { --i: 5; }
+:global(.stagger) > *:nth-child(7) { --i: 6; }
+:global(.stagger) > *:nth-child(8) { --i: 7; }
+
+/* ---------- Le moment fort : entrée du hero au chargement ---------- */
+@keyframes heroIn {
+  from { opacity: 0; transform: scale(1.03) translate3d(0, 16px, 0); filter: blur(6px); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+.heroEnter {
+  animation: heroIn 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Accessibilité : pas d'animation si l'utilisateur la désactive ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal :global(.stagger) > * {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .heroEnter { animation: none; }
+}
