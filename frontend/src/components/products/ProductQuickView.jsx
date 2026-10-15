@@ -103,9 +103,12 @@ export default function ProductQuickView({ product, onClose }) {
               </div>
             )}
 
-            <Link to={`/products/${product.slug}`} className={styles.detailLink} onClick={onClose}>
-              Voir les détails complets →
-            </Link>
+            {/* Wrapper pour centrer le bouton */}
+            <div className={styles.detailLinkWrapper}>
+              <Link to={`/products/${product.slug}`} className={styles.detailLink} onClick={onClose}>
+                Voir les détails complets
+              </Link>
+            </div>
           </div>
         </div>
       </div>

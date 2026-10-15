@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { productService } from '../services/productService';
 import { getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
 import { Loader } from '../components/common/Loader';
+import { getProductDiscount } from '../utils/productHelpers';
+import styles from './ProductDetailPage.module.css';
 
 const buildDefaultReviews = (product) => {
   const fallbackReviews = [
@@ -51,6 +53,23 @@ const formatReviewDate = (value) => {
   }
 };
 
+const getGallery = (product) => {
+  const extra = Array.isArray(product?.images) ? product.images : [];
+  const urls = [product?.display_image, ...extra.map((i) => (typeof i === 'string' ? i : i?.image || i?.url))]
+    .filter(Boolean);
+  return [...new Set(urls)];
+};
+
+function Stars({ value, className = '' }) {
+  const full = Math.max(0, Math.min(5, Math.round(Number(value) || 0)));
+  return (
+    <span className={`${styles.stars} ${className}`} role="img" aria-label={`${full} sur 5`}>
+      {'★'.repeat(full)}
+      <span className={styles.starOff}>{'★'.repeat(5 - full)}</span>
+    </span>
+  );
+}
+
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
@@ -60,13 +79,25 @@ export default function ProductDetailPage() {
   const [reviews, setReviews] = useState([]);
   const [reviewText, setReviewText] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [activeTab, setActiveTab] = useState('description');
+  const [activeImage, setActiveImage] = useState(0);
+  const [added, setAdded] = useState(false);
+  const [showBar, setShowBar] = useState(false);
+  const tabsRef = useRef(null);
+  const actionsRef = useRef(null);
+  const addedTimer = useRef(null);
   const { user, isAuthenticated } = useAuth();
   const { addToCart } = useCart();
   const { notify } = useNotification();
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     setLoading(true);
+    setQuantity(1);
+    setActiveTab('description');
+    setActiveImage(0);
     productService
       .getProduct(slug)
       .then(({ data }) => {
@@ -77,6 +108,27 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false));
   }, [slug, notify]);
 
+  // Barre d'achat collée en bas (mobile) quand le bouton principal sort de l'écran
+  useEffect(() => {
+    const node = actionsRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [product]);
+
+  useEffect(() => () => clearTimeout(addedTimer.current), []);
+
+  const handleZoom = (event) => {
+    const box = event.currentTarget;
+    const rect = box.getBoundingClientRect();
+    box.style.setProperty('--zx', `${((event.clientX - rect.left) / rect.width) * 100}%`);
+    box.style.setProperty('--zy', `${((event.clientY - rect.top) / rect.height) * 100}%`);
+  };
+
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: { pathname: `/products/${slug}` } } });
@@ -86,6 +138,9 @@ export default function ProductDetailPage() {
     try {
       await addToCart(product.id, quantity);
       notify('Produit ajouté au panier', 'success');
+      setAdded(true);
+      clearTimeout(addedTimer.current);
+      addedTimer.current = setTimeout(() => setAdded(false), 1800);
     } catch (err) {
       notify(getErrorMessage(err), 'error');
     } finally {
@@ -121,6 +176,11 @@ export default function ProductDetailPage() {
     notify('Votre avis a bien été ajouté.', 'success');
   };
 
+  const openReviews = () => {
+    setActiveTab('reviews');
+    tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   if (loading) return <Loader fullPage />;
   if (!product) return <div className="container page"><p>Produit introuvable.</p></div>;
 
@@ -128,154 +188,392 @@ export default function ProductDetailPage() {
     ? (reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length).toFixed(1)
     : '5.0';
 
+  const distribution = [5, 4, 3, 2, 1].map((star) => {
+    const count = reviews.filter((r) => Math.round(Number(r.rating)) === star).length;
+    return { star, count, percent: reviews.length ? (count / reviews.length) * 100 : 0 };
+  });
+
+  const inStock = product.stock > 0;
+  const lowStock = inStock && product.stock <= 5;
+  const hasSpecs = product.specs && Object.keys(product.specs).length > 0;
+  const highlights = hasSpecs ? Object.entries(product.specs).slice(0, 3) : [];
+  const gallery = getGallery(product);
+  const discount = getProductDiscount(product);
+  const total = (Number(product.price) * quantity).toFixed(2);
+
+  const tabs = [
+    { id: 'description', label: 'Description' },
+    ...(hasSpecs ? [{ id: 'specs', label: 'Caractéristiques' }] : []),
+    { id: 'reviews', label: 'Avis', count: reviews.length },
+  ];
+
+  const ease = [0.22, 1, 0.36, 1];
+  const shownRating = hoverRating || reviewRating;
+
+  const addLabel = adding ? 'Ajout...' : added ? 'Ajouté au panier' : 'Ajouter au panier';
+
   return (
-    <motion.div
-      className="container page product-detail"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      <section className="card product-detail__hero">
-        <div className="product-detail__image">
-          {product.display_image ? (
-            <img src={product.display_image} alt={product.name} />
-          ) : (
-            <div className="product-card__placeholder product-card__placeholder--lg">📦</div>
-          )}
-        </div>
+    <div className={styles.detail}>
+      {/* ---------- Bandeau ---------- */}
+      <div className={styles.band}>
+        <motion.p
+          className={styles.bandTitle}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease }}
+        >
+          Détails du <span className={styles.bandAccent}>Produit</span>
+        </motion.p>
+      </div>
+      <br></br>
+      <motion.div
+        className={`container ${styles.content}`}
+        initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease }}
+      >
+        {/* ---------- Bloc principal : galerie + achat ---------- */}
+        <section className={styles.hero}>
+          <div className={styles.gallery}>
+            <div className={styles.imageBox} onMouseMove={handleZoom}>
+              {discount ? (
+                <span className={styles.discountBadge}>
+                  {typeof discount === 'number' ? `-${discount}%` : 'Promo'}
+                </span>
+              ) : null}
 
-        <div className="product-detail__info">
-          {product.brand && <span className="product-card__brand">{product.brand}</span>}
-          <h1>{product.name}</h1>
-
-          <div className="product-detail__rating">
-            <span className="product-detail__rating-stars">{'★'.repeat(Math.round(Number(averageRating)))}{'☆'.repeat(5 - Math.round(Number(averageRating)))}</span>
-            <span>{averageRating} · {reviews.length} avis</span>
-          </div>
-
-          <p className="product-detail__price">{Number(product.price).toFixed(2)} €</p>
-          <p className="product-detail__desc">{product.description}</p>
-
-          <div className="product-detail__meta">
-            <div className="product-detail__meta-item">
-              <span className="product-detail__meta-label">Disponibilité</span>
-              <strong>{product.stock > 0 ? `${product.stock} en stock` : 'Rupture de stock'}</strong>
+              {gallery.length > 0 ? (
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.img
+                    key={gallery[activeImage] || gallery[0]}
+                    src={gallery[activeImage] || gallery[0]}
+                    alt={product.name}
+                    className={styles.image}
+                    initial={reduceMotion ? false : { opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                </AnimatePresence>
+              ) : (
+                <div className={styles.imagePlaceholder} aria-hidden="true">📦</div>
+              )}
             </div>
-            <div className="product-detail__meta-item">
-              <span className="product-detail__meta-label">Catégorie</span>
-              <strong>{product.category_name || 'Produit'}</strong>
-            </div>
-          </div>
 
-          {product.stock > 0 && (
-            <div className="product-detail__actions">
-              <div className="quantity-control">
-                <button type="button" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>−</button>
-                <span>{quantity}</span>
-                <button type="button" onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}>+</button>
+            {gallery.length > 1 && (
+              <div className={styles.thumbs}>
+                {gallery.map((url, index) => (
+                  <button
+                    key={url}
+                    type="button"
+                    className={`${styles.thumb}${index === activeImage ? ` ${styles.thumbActive}` : ''}`}
+                    onClick={() => setActiveImage(index)}
+                    aria-label={`Voir l'image ${index + 1}`}
+                  >
+                    <img src={url} alt="" />
+                  </button>
+                ))}
               </div>
-              <button
-                type="button"
-                className="btn btn--primary btn--lg"
-                onClick={handleAddToCart}
-                disabled={adding}
-              >
-                {adding ? 'Ajout...' : 'Ajouter au panier'}
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+            )}
+          </div>
 
-      <div className="product-detail__content">
-        <section className="card product-detail__section">
-          <h2>À propos de ce produit</h2>
-          <p>{product.description}</p>
+          <div className={styles.info}>
+            <div className={styles.topLine}>
+              {product.brand && <span className={styles.brand}>{product.brand}</span>}
+              {product.category_name && <span className={styles.category}>{product.category_name}</span>}
+            </div>
+
+            <h1 className={styles.name}>{product.name}</h1>
+
+            <button type="button" className={styles.ratingRow} onClick={openReviews}>
+              <Stars value={averageRating} />
+              <span>{averageRating}</span>
+              <span className={styles.ratingLink}>{reviews.length} avis</span>
+            </button>
+
+            <p className={styles.price}>{Number(product.price).toFixed(2)} €</p>
+
+            <p className={styles.shortDesc}>{product.description}</p>
+
+            {highlights.length > 0 && (
+              <ul className={styles.highlights}>
+                {highlights.map(([key, val]) => (
+                  <li key={key} className={styles.highlight}>
+                    <span>{key}</span>
+                    <strong>{String(val)}</strong>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <div className={styles.buyBox} ref={actionsRef}>
+              <p className={`${styles.stock} ${inStock ? styles.stockOk : styles.stockOut}`}>
+                <span className={styles.stockDot} aria-hidden="true" />
+                {!inStock && 'Rupture de stock'}
+                {inStock && !lowStock && `${product.stock} en stock`}
+                {lowStock && `Plus que ${product.stock} en stock`}
+              </p>
+
+              {inStock && (
+                <>
+                  <div className={styles.actions}>
+                    <div className={styles.quantity}>
+                      <motion.button
+                        type="button"
+                        aria-label="Diminuer la quantité"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        whileTap={{ scale: 0.88 }}
+                      >
+                        −
+                      </motion.button>
+                      <span aria-live="polite">{quantity}</span>
+                      <motion.button
+                        type="button"
+                        aria-label="Augmenter la quantité"
+                        onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                        whileTap={{ scale: 0.88 }}
+                      >
+                        +
+                      </motion.button>
+                    </div>
+
+                    <motion.button
+                      type="button"
+                      className={`${styles.addBtn}${added ? ` ${styles.addBtnDone}` : ''}`}
+                      onClick={handleAddToCart}
+                      disabled={adding}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {added ? (
+                        <svg viewBox="0 0 24 24" className={styles.addIcon} aria-hidden="true">
+                          <path d="m5 12.5 4.5 4.5L19 7.5" />
+                        </svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" className={styles.addIcon} aria-hidden="true">
+                          <circle cx="9" cy="20" r="1.4" />
+                          <circle cx="18" cy="20" r="1.4" />
+                          <path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8h9.2a1 1 0 0 0 1-.8L21 7H6" />
+                        </svg>
+                      )}
+                      {addLabel}
+                    </motion.button>
+                  </div>
+
+                  <div className={styles.totalRow}>
+                    <span>Total</span>
+                    <strong>{total} €</strong>
+                  </div>
+                </>
+              )}
+
+              <p className={styles.note}>
+                <svg viewBox="0 0 24 24" className={styles.noteIcon} aria-hidden="true">
+                  <path d="M3 6h11v10H3zM14 9h4l3 3v4h-7z" />
+                  <circle cx="7.5" cy="17.5" r="1.7" />
+                  <circle cx="17.5" cy="17.5" r="1.7" />
+                </svg>
+                Livraison gratuite dès 50 DH d'achat
+              </p>
+            </div>
+          </div>
         </section>
 
-        {product.specs && Object.keys(product.specs).length > 0 && (
-          <section className="card product-detail__section">
-            <h2>Caractéristiques</h2>
-            <dl className="product-detail__specs">
-              {Object.entries(product.specs).map(([key, val]) => (
-                <div key={key}>
-                  <dt>{key}</dt>
-                  <dd>{val}</dd>
+        {/* ---------- Onglets ---------- */}
+        <section className={styles.tabsCard} ref={tabsRef}>
+          <div className={styles.tabList} role="tablist">
+            {tabs.map((tab) => {
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  className={`${styles.tab}${active ? ` ${styles.tabActive}` : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                  {tab.count !== undefined && <span className={styles.tabCount}>{tab.count}</span>}
+                  {active && (
+                    <motion.span
+                      layoutId="detail-tab-underline"
+                      className={styles.tabUnderline}
+                      transition={reduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 40 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={activeTab}
+              className={styles.panel}
+              role="tabpanel"
+              initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease }}
+            >
+              {/* Description */}
+              {activeTab === 'description' && (
+                <div className={styles.prose}>
+                  <h2 className={styles.panelTitle}>À propos de ce produit</h2>
+                  <p>{product.description}</p>
                 </div>
-              ))}
-            </dl>
-          </section>
-        )}
-      </div>
+              )}
 
-      <section className="card product-detail__reviews">
-        <div className="product-detail__reviews-header">
-          <div>
-            <h2>Avis clients</h2>
-            <p>Découvrez les retours d’autres acheteurs et partagez votre expérience.</p>
-          </div>
-
-          <div className="product-detail__rating-summary">
-            <strong>{averageRating}</strong>
-            <span>sur 5</span>
-            <small>{reviews.length} avis</small>
-          </div>
-        </div>
-
-        <form className="product-detail__review-form" onSubmit={handleSubmitReview}>
-          <label>
-            Votre commentaire
-            <textarea
-              className="input"
-              rows="4"
-              placeholder="Décrivez votre expérience avec ce produit..."
-              value={reviewText}
-              onChange={(event) => setReviewText(event.target.value)}
-            />
-          </label>
-
-          <div className="product-detail__review-rating">
-            <span>Votre note</span>
-            <div className="product-detail__stars" role="radiogroup" aria-label="Sélectionner une note">
-              {Array.from({ length: 5 }, (_, index) => {
-                const value = index + 1;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    className="product-detail__star-btn"
-                    aria-label={`Noter ${value} étoiles`}
-                    onClick={() => setReviewRating(value)}
-                  >
-                    {value <= reviewRating ? '★' : '☆'}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <button type="submit" className="btn btn--primary">
-            {isAuthenticated ? 'Publier mon avis' : 'Se connecter pour commenter'}
-          </button>
-        </form>
-
-        <div className="product-detail__review-list">
-          {reviews.map((review) => (
-            <article className="product-detail__review-item" key={review.id}>
-              <div className="product-detail__review-top">
+              {/* Caractéristiques */}
+              {activeTab === 'specs' && hasSpecs && (
                 <div>
-                  <h3>{review.title || 'Avis client'}</h3>
-                  <p className="product-detail__review-author">{review.author}</p>
+                  <h2 className={styles.panelTitle}>Caractéristiques</h2>
+                  <dl className={styles.specs}>
+                    {Object.entries(product.specs).map(([key, val]) => (
+                      <div key={key} className={styles.specRow}>
+                        <dt>{key}</dt>
+                        <dd>{val}</dd>
+                      </div>
+                    ))}
+                  </dl>
                 </div>
-                <span className="product-detail__review-rating-display">
-                  {'★'.repeat(Number(review.rating || 0))}{'☆'.repeat(5 - Number(review.rating || 0))}
-                </span>
-              </div>
-              <p>{review.comment}</p>
-              <span className="product-detail__review-date">{formatReviewDate(review.created_at)}</span>
-            </article>
-          ))}
-        </div>
-      </section>
-    </motion.div>
+              )}
+
+              {/* Avis */}
+              {activeTab === 'reviews' && (
+                <div>
+                  <div className={styles.reviewsTop}>
+                    <div className={styles.summary}>
+                      <div className={styles.summaryScore}>
+                        <strong>{averageRating}</strong>
+                        <span>sur 5</span>
+                      </div>
+                      <Stars value={averageRating} className={styles.summaryStars} />
+                      <small>{reviews.length} avis</small>
+
+                      <ul className={styles.bars}>
+                        {distribution.map((row) => (
+                          <li key={row.star} className={styles.barRow}>
+                            <span>{row.star}★</span>
+                            <span className={styles.barTrack}>
+                              <motion.span
+                                className={styles.barFill}
+                                initial={reduceMotion ? false : { width: 0 }}
+                                animate={{ width: `${row.percent}%` }}
+                                transition={{ duration: 0.6, ease }}
+                              />
+                            </span>
+                            <span className={styles.barCount}>{row.count}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <form className={styles.form} onSubmit={handleSubmitReview}>
+                      <h2 className={styles.panelTitle}>Donnez votre avis</h2>
+
+                      <div className={styles.formRating}>
+                        <span>Votre note</span>
+                        <div
+                          className={styles.starPicker}
+                          role="radiogroup"
+                          aria-label="Sélectionner une note"
+                          onMouseLeave={() => setHoverRating(0)}
+                        >
+                          {Array.from({ length: 5 }, (_, index) => {
+                            const value = index + 1;
+                            return (
+                              <motion.button
+                                key={value}
+                                type="button"
+                                role="radio"
+                                aria-checked={reviewRating === value}
+                                className={`${styles.starBtn}${value <= shownRating ? ` ${styles.starOn}` : ''}`}
+                                aria-label={`Noter ${value} étoiles`}
+                                onMouseEnter={() => setHoverRating(value)}
+                                onClick={() => setReviewRating(value)}
+                                whileTap={{ scale: 0.8 }}
+                              >
+                                ★
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <label className={styles.field}>
+                        <span>Votre commentaire</span>
+                        <textarea
+                          className={styles.textarea}
+                          rows="4"
+                          placeholder="Décrivez votre expérience avec ce produit..."
+                          value={reviewText}
+                          onChange={(event) => setReviewText(event.target.value)}
+                        />
+                      </label>
+
+                      <button type="submit" className={styles.submitBtn}>
+                        {isAuthenticated ? 'Publier mon avis' : 'Se connecter pour commenter'}
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className={styles.reviewList}>
+                    <AnimatePresence initial={false}>
+                      {reviews.map((review) => (
+                        <motion.article
+                          key={review.id}
+                          className={styles.review}
+                          layout={!reduceMotion}
+                          initial={reduceMotion ? false : { opacity: 0, y: -12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, ease }}
+                        >
+                          <span className={styles.avatar} aria-hidden="true">
+                            {(review.author || 'C').charAt(0).toUpperCase()}
+                          </span>
+                          <div className={styles.reviewBody}>
+                            <div className={styles.reviewHead}>
+                              <div>
+                                <p className={styles.reviewAuthor}>{review.author}</p>
+                                <span className={styles.reviewDate}>{formatReviewDate(review.created_at)}</span>
+                              </div>
+                              <Stars value={review.rating} />
+                            </div>
+                            <h3 className={styles.reviewTitle}>{review.title || 'Avis client'}</h3>
+                            <p className={styles.reviewText}>{review.comment}</p>
+                          </div>
+                        </motion.article>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </section>
+      </motion.div>
+
+      {/* ---------- Barre d'achat mobile ---------- */}
+      <AnimatePresence>
+        {showBar && inStock && (
+          <motion.div
+            className={styles.stickyBar}
+            initial={{ y: 90 }}
+            animate={{ y: 0 }}
+            exit={{ y: 90 }}
+            transition={{ duration: 0.3, ease }}
+          >
+            <div className={styles.stickyInfo}>
+              <span className={styles.stickyName}>{product.name}</span>
+              <strong>{Number(product.price).toFixed(2)} €</strong>
+            </div>
+            <button type="button" className={styles.stickyBtn} onClick={handleAddToCart} disabled={adding}>
+              {addLabel}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

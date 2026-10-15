@@ -176,7 +176,7 @@ export default function ProductsPage() {
           Notre catalogue
         </motion.span> */}
         <motion.h1 className={styles.heroTitle} variants={heroItem}>
-          Découvrez nos <span className={styles.heroAccent}>produits</span>
+          Découvrez nos <span className={styles.heroAccent}>Produits</span>
         </motion.h1>
        {/*  <motion.p className={styles.heroText} variants={heroItem}>
           Ordinateurs, smartphones, gaming, audio et accessoires au meilleur prix.

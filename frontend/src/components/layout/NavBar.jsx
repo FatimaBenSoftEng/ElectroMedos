@@ -64,12 +64,12 @@ export default function NavBar({ categories = [] }) {
               </Link>
             </li>
           ))}
-          {isAuthenticated && (
+          {/* {isAuthenticated && (
             <li>
               <Link to="/orders" onClick={() => setMobileOpen(false)}>Mes commandes</Link>
             </li>
             
-          )}
+          )} */}
           <li>
           <Link to="/contact" onClick={() => setMobileOpen(false)}>
             Contactez-nous

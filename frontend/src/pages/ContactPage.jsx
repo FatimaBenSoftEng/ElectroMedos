@@ -55,8 +55,8 @@ export default function ContactPage() {
           variants={fadeUp}
           className={styles.heroContent}
         >
-          <span className={styles.badge}>Contactez-nous</span>
-          <h1 className={styles.heroTitle}>
+{/*           <span className={styles.badge}>Contactez-nous</span>
+ */}          <h1 className={styles.heroTitle}>
             Une question ? <span>On est là</span>
           </h1>
           <p className={styles.heroText}>

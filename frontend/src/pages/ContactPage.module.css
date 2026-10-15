@@ -4,13 +4,29 @@
 
 /* ===== Hero (identique à AboutPage pour cohérence) ===== */
 .hero {
-  background: linear-gradient(135deg, #1e1b4b 0%, #4f46e5 100%);
-  padding: 90px 20px 110px;
+  position: relative;
+  background-image: url('/images/product-banner.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 28px 110px;
   text-align: center;
   color: #fff;
+  overflow: hidden;
 }
 
+/* Overlay sombre pour la lisibilité du texte */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Le contenu passe au-dessus de l'overlay */
 .heroContent {
+  position: relative;
+  z-index: 2;
   max-width: 700px;
   margin: 0 auto;
 }

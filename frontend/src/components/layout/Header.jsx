@@ -146,13 +146,13 @@ export default function Header({ categories = [] }) {
                   <span>Mon profil</span>
                 </Link>
 
-                <Link
+                {/* <Link
                   to="/orders"
                   onClick={() => setMenuOpen(false)}
                 >
                   <FiPackage />
                   <span>Mes commandes</span>
-                </Link>
+                </Link> */}
 
                 <button
                   type="button"
