@@ -5,13 +5,21 @@ import {
   FiShoppingCart,
   FiUser,
   FiPackage,
-  FiLogOut
+  FiLogOut,
+  FiUserCheck,
+  FiChevronDown
 } from 'react-icons/fi';
 
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import styles from './Header.module.css';
+
+const chevronStyle = (open) => ({
+  flexShrink: 0,
+  transition: 'transform 0.2s ease',
+  transform: open ? 'rotate(180deg)' : 'none',
+});
 
 export default function Header({ categories = [] }) {
   const { isAuthenticated, user, logout } = useAuth();
@@ -110,8 +118,10 @@ export default function Header({ categories = [] }) {
               <FiUser />
 
               <div className={styles.actionText}>
-                <strong>Connexion</strong>
+                <strong>Se connecter</strong>
               </div>
+
+              <FiChevronDown style={chevronStyle(false)} />
             </Link>
           ) : (
 
@@ -127,13 +137,15 @@ export default function Header({ categories = [] }) {
                 type="button"
                 className={styles.actionButton}
               >
-                <FiUser />
+                <FiUserCheck />
 
                 <div className={styles.actionText}>
                   <strong>
-                    {user?.first_name || user?.username}
+                    Bonjour, {user?.first_name || user?.username}
                   </strong>
                 </div>
+
+                <FiChevronDown style={chevronStyle(menuOpen)} />
               </button>
 
               <div className={styles.dropdown}>
@@ -146,13 +158,21 @@ export default function Header({ categories = [] }) {
                   <span>Mon profil</span>
                 </Link>
 
-                {/* <Link
-                  to="/orders"
+                <Link
+                  to="/profile?tab=commandes"
                   onClick={() => setMenuOpen(false)}
                 >
                   <FiPackage />
-                  <span>Mes commandes</span>
-                </Link> */}
+                  <span>Vos commandes</span>
+                </Link>
+
+                <Link
+                  to="/profile?tab=favoris"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <FiHeart />
+                  <span>Favoris</span>
+                </Link>
 
                 <button
                   type="button"
@@ -171,7 +191,7 @@ export default function Header({ categories = [] }) {
           {/* Favoris */}
 
           <Link
-            to="/wishlist"
+            to="/profile?tab=favoris"
             className={styles.actionIcon}
           >
             <FiHeart />

@@ -441,11 +441,13 @@
 /* ===== Favoris ===== */
 .wishlistGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 1.25rem;
 }
 
 .wishlistCard {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   padding: 0.75rem;
@@ -456,6 +458,13 @@
 
 .wishlistCard:hover {
   box-shadow: var(--shadow);
+}
+
+.wishlistCardLink {
+  display: block;
+  flex: 1;
+  color: inherit;
+  text-decoration: none;
 }
 
 .wishlistCardImg {
@@ -477,7 +486,34 @@
   font-size: 0.85rem;
   color: var(--color-primary);
   font-weight: 600;
-  margin: 0 0 0.6rem;
+  margin: 0.25rem 0 0.8rem;
+}
+
+.wishlistCardBtn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.wishlistCardBtn:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.wishlistCardBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.wishlistCardBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 /* ===== États vides ===== */
@@ -489,10 +525,4 @@
 
 .emptyState p {
   margin-bottom: 1rem;
-}
-
-/* ===== Petit bouton ===== */
-.btnSm {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
 }

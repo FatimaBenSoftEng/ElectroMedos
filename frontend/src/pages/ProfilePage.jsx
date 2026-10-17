@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
@@ -20,6 +20,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
 import { getErrorMessage } from '../services/api';
 import { useWishlist } from '../context/WishlistContext';
@@ -28,13 +29,14 @@ import { productService } from '../services/productService';
 import styles from './ProfilePage.module.css';
 
 const TABS = [
-  { id: 'infos', label: 'Mon profil', icon: User },
-  { id: 'commandes', label: 'Mes commandes', icon: Package },
-  { id: 'retours', label: 'Mes retours', icon: Undo2 },
-  { id: 'adresses', label: 'Mes adresses', icon: MapPin },
-  { id: 'paiement', label: 'Mes moyens de paiement', icon: CreditCard },
-  { id: 'favoris', label: 'Mes favoris', icon: Heart },
-  { id: 'avis', label: 'Mes avis', icon: Star },
+  { id: 'infos', label: 'Mon profil ', icon: User },
+  { id: 'commandes', label: 'Vos commandes', icon: Package },
+  { id: 'retours', label: 'Retours', icon: Undo2 },
+  { id: 'favoris', label: 'Favoris', icon: Heart },
+  { id: 'avis', label: 'Avis', icon: Star },
+  { id: 'adresses', label: 'Adresses', icon: MapPin },
+/*   { id: 'paiement', label: 'Moyens de paiement', icon: CreditCard },
+ */
   { id: 'parametres', label: 'Paramètres', icon: Settings },
 ];
 
@@ -48,9 +50,15 @@ const fadeSlide = {
 export default function ProfilePage() {
   const { user, updateProfile, changePassword, logout } = useAuth();
   const { items: wishlistItems } = useWishlist();
+  const { addToCart } = useCart();
   const { notify } = useNotification();
 
-  const [activeTab, setActiveTab] = useState('infos');
+  // L'onglet actif vient de l'adresse : /profile?tab=commandes ou /profile?tab=favoris
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const activeTab = TABS.some((t) => t.id === tabFromUrl) ? tabFromUrl : 'infos';
+  const setActiveTab = (id) => setSearchParams(id === 'infos' ? {} : { tab: id });
+
   const [loading, setLoading] = useState(false);
 
   const [orders, setOrders] = useState([]);
@@ -58,6 +66,7 @@ export default function ProfilePage() {
 
   const [wishlistProducts, setWishlistProducts] = useState([]);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [addingId, setAddingId] = useState(null);
 
   // Bascule lecture / édition pour "Informations" et "Adresses"
   const [editingInfos, setEditingInfos] = useState(false);
@@ -110,6 +119,18 @@ export default function ProfilePage() {
   const handleChange = (setter) => (e) => {
     const { name, value } = e.target;
     setter((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddToCart = async (product) => {
+    setAddingId(product.id);
+    try {
+      await addToCart(product.id, 1);
+      notify('Produit ajouté au panier', 'success');
+    } catch (err) {
+      notify(getErrorMessage(err), 'error');
+    } finally {
+      setAddingId(null);
+    }
   };
 
   const handleSubmitInfos = async (e) => {
@@ -183,28 +204,8 @@ export default function ProfilePage() {
     cancelled: { label: 'Annulée', className: `${styles.badge} ${styles.badgeDanger}` },
   };
 
-  const profileStats = [
-    { label: 'Commandes', value: orders.length, icon: Package, tone: 'package' },
-    { label: 'Favoris', value: wishlistItems.length, icon: Heart, tone: 'heart' },
-    { label: 'Bons de réduction', value: 0, icon: Ticket, tone: 'ticket' },
-    { label: 'Points cumulés', value: user?.points ?? 0, icon: Star, tone: 'star' },
-  ];
-
   return (
     <div className={`container page ${styles.profilePage}`}>
-      {/* ===== En-tête ===== */}
-  {/*     <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className={styles.pageHeader}
-      >
-        <h1 className={styles.pageHeaderTitle}>
-          Bonjour {form.first_name || user?.username} ! <span>👋</span>
-        </h1>
-        <p className={styles.pageHeaderSubtitle}>Bienvenue dans votre espace personnel.</p>
-      </motion.div> */}
-
       <div className={styles.profileLayout}>
         {/* ===== Sidebar ===== */}
         <aside className={styles.profileSidebar}>
@@ -220,13 +221,6 @@ export default function ProfilePage() {
               {form.first_name || user?.username} {form.last_name}
             </p>
             <p className={styles.profileCardSubtitle}>{form.email}</p>
-
-            {/* <div className={styles.profileCardBadgeBox}>
-              <span className={styles.profileCardBadge}>
-                <Star size={13} /> Membre Or
-              </span>
-              <span className={styles.profileCardPoints}>{user?.points ?? 1250} points</span>
-            </div> */}
           </div>
 
           <nav className={styles.profileTabs}>
@@ -258,27 +252,10 @@ export default function ProfilePage() {
 
         {/* ===== Contenu ===== */}
         <div className={styles.profileContent}>
-          {/* ===== Cartes de stats (petites, même colonne que le contenu) ===== */}
-          <div className={styles.statsRow}>
-            {profileStats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className={styles.statCard}>
-                  <div className={`${styles.statIcon} ${styles[`statIcon--${stat.tone}`]}`}>
-                    <Icon size={16} />
-                  </div>
-                  <p className={styles.statValue}>{stat.value}</p>
-                  <p className={styles.statLabel}>{stat.label}</p>
-                </div>
-              );
-            })}
-          </div>
-
           <AnimatePresence mode="wait">
             {/* Informations personnelles */}
             {activeTab === 'infos' && (
               <motion.div key="infos" {...fadeSlide}>
-                {/* ===== Informations personnelles ===== */}
                 <div className="card" style={{ marginBottom: '1.25rem' }}>
                   <div className={styles.cardHeader}>
                     <h2>Informations personnelles</h2>
@@ -387,52 +364,6 @@ export default function ProfilePage() {
                     </form>
                   )}
                 </div>
-
-                {/* ===== Aperçu des dernières commandes ===== */}
-                {!ordersLoading && orders.length > 0 && (
-                  <div className="card">
-                    <div className={styles.cardHeader}>
-                      <h2>Mes dernières commandes</h2>
-                      <Link to="/orders" className={styles.cardHeaderLink}>
-                        Voir toutes <ChevronRight size={15} />
-                      </Link>
-                    </div>
-                    <ul className={styles.orderList}>
-                      {orders.slice(0, 3).map((order) => {
-                        const thumb =
-                          order.items?.[0]?.product?.display_image ||
-                          order.items?.[0]?.product?.image ||
-                          order.items?.[0]?.image;
-                        return (
-                          <li key={order.id} className={styles.orderListItem}>
-                            {thumb ? (
-                              <img src={thumb} alt="" className={styles.orderListThumb} />
-                            ) : (
-                              <div className={styles.orderListIcon}>
-                                <Package size={20} />
-                              </div>
-                            )}
-                            <div className={styles.orderListMain}>
-                              <strong>Commande #{order.reference || order.id}</strong>
-                              <p className={styles.orderListDate}>
-                                Passée le {new Date(order.created_at).toLocaleDateString('fr-FR')}
-                              </p>
-                            </div>
-                            <span className={statusStyle[order.status]?.className || styles.badge}>
-                              {statusStyle[order.status]?.label || order.status}
-                            </span>
-                            <span className={styles.orderListTotal}>
-                              {Number(order.total).toFixed(2)} MAD
-                            </span>
-                            <Link to={`/orders/${order.id}`} className={styles.orderListLink}>
-                              <ChevronRight size={18} />
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
-                )}
               </motion.div>
             )}
 
@@ -440,10 +371,7 @@ export default function ProfilePage() {
             {activeTab === 'commandes' && (
               <motion.div key="commandes" {...fadeSlide} className="card">
                 <div className={styles.cardHeader}>
-                  <h2>Mes dernières commandes</h2>
-                  <Link to="/orders" className={styles.cardHeaderLink}>
-                    Voir toutes <ChevronRight size={15} />
-                  </Link>
+                  <h2>Vos commandes</h2>
                 </div>
                 {ordersLoading ? (
                   <p>Chargement...</p>
@@ -502,7 +430,7 @@ export default function ProfilePage() {
             {activeTab === 'retours' && (
               <motion.div key="retours" {...fadeSlide} className="card">
                 <div className={styles.cardHeader}>
-                  <h2>Mes retours</h2>
+                  <h2>Retours</h2>
                 </div>
                 <div className={styles.emptyState}>
                   <p>Vous n'avez aucune demande de retour en cours.</p>
@@ -614,7 +542,7 @@ export default function ProfilePage() {
             )}
 
             {/* Moyens de paiement */}
-            {activeTab === 'paiement' && (
+           {/*  {activeTab === 'paiement' && (
               <motion.div key="paiement" {...fadeSlide} className="card">
                 <div className={styles.cardHeader}>
                   <h2>Mes moyens de paiement</h2>
@@ -626,13 +554,13 @@ export default function ProfilePage() {
                   </button>
                 </div>
               </motion.div>
-            )}
+            )} */}
 
             {/* Favoris */}
             {activeTab === 'favoris' && (
               <motion.div key="favoris" {...fadeSlide} className="card">
                 <div className={styles.cardHeader}>
-                  <h2>Mes favoris</h2>
+                  <h2>Favoris</h2>
                 </div>
                 {wishlistLoading ? (
                   <p>Chargement...</p>
@@ -645,25 +573,39 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className={styles.wishlistGrid}>
-                    {wishlistProducts.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        className={styles.wishlistCard}
-                        whileHover={{ y: -4 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <img
-                          src={item.display_image || item.image || item.image_url}
-                          alt={item.name}
-                          className={styles.wishlistCardImg}
-                        />
-                        <p className={styles.wishlistCardName}>{item.name}</p>
-                        <p className={styles.wishlistCardPrice}>{item.price} MAD</p>
-                        <Link to={`/products/${item.slug}`} className={`btn ${styles.btnSm} btn--primary`}>
-                          Voir le produit
-                        </Link>
-                      </motion.div>
-                    ))}
+                    {wishlistProducts.map((item) => {
+                      const outOfStock = item.stock !== undefined && item.stock <= 0;
+                      return (
+                        <motion.div
+                          key={item.id}
+                          className={styles.wishlistCard}
+                          whileHover={{ y: -4 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Link to={`/products/${item.slug}`} className={styles.wishlistCardLink}>
+                            <img
+                              src={item.display_image || item.image || item.image_url}
+                              alt={item.name}
+                              className={styles.wishlistCardImg}
+                            />
+                            <p className={styles.wishlistCardName}>{item.name}</p>
+                          </Link>
+                          <p className={styles.wishlistCardPrice}>{item.price} MAD</p>
+                          <button
+                            type="button"
+                            className={styles.wishlistCardBtn}
+                            onClick={() => handleAddToCart(item)}
+                            disabled={outOfStock || addingId === item.id}
+                          >
+                            {outOfStock
+                              ? 'Rupture de stock'
+                              : addingId === item.id
+                                ? 'Ajout...'
+                                : 'Ajouter au panier'}
+                          </button>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 )}
               </motion.div>
@@ -673,7 +615,7 @@ export default function ProfilePage() {
             {activeTab === 'avis' && (
               <motion.div key="avis" {...fadeSlide} className="card">
                 <div className={styles.cardHeader}>
-                  <h2>Mes avis</h2>
+                  <h2>Avis</h2>
                 </div>
                 <div className={styles.emptyState}>
                   <p>Vous n'avez pas encore publié d'avis.</p>
