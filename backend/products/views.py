@@ -1,17 +1,21 @@
-from django_filters import rest_framework as filters
-from rest_framework import generics, permissions, viewsets, status
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
 from django.core.files.storage import default_storage
+from django.db.models import Avg, Count
+from django.shortcuts import get_object_or_404
+from django_filters import rest_framework as filters
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.response import Response
 
-from .models import Category, Product
+from .models import Category, Product, Review
 from .serializers import (
     CategorySerializer,
     ProductDetailSerializer,
     ProductListSerializer,
     ProductWriteSerializer,
+    ReviewSerializer,
 )
 
 
@@ -19,6 +23,14 @@ class AdminProductPagination(PageNumberPagination):
     page_size = 5
     page_size_query_param = 'page_size'
     max_page_size = 50
+
+
+def products_with_rating():
+    """Produits avec note moyenne et nombre d'avis calculés en base."""
+    return Product.objects.select_related('category').annotate(
+        rating_avg=Avg('reviews__rating'),
+        review_count_annot=Count('reviews'),
+    )
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,7 +58,7 @@ class ProductListView(generics.ListAPIView):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        return Product.objects.select_related('category').all()
+        return products_with_rating()
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -54,7 +66,7 @@ class ProductDetailView(generics.RetrieveAPIView):
     lookup_field = 'slug'
 
     def get_queryset(self):
-        return Product.objects.select_related('category').all()
+        return products_with_rating()
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -68,7 +80,42 @@ class FeaturedProductsView(generics.ListAPIView):
     serializer_class = ProductListSerializer
 
     def get_queryset(self):
-        return Product.objects.filter(is_featured=True).select_related('category')[:8]
+        return products_with_rating().filter(is_featured=True)[:8]
+
+
+class ProductReviewListCreateView(generics.ListCreateAPIView):
+    """GET : liste des avis d'un produit. POST : publier un avis (connecté)."""
+    serializer_class = ReviewSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [permissions.IsAuthenticated()]
+        return [permissions.AllowAny()]
+
+    def get_queryset(self):
+        return Review.objects.filter(
+            product__slug=self.kwargs['slug']
+        ).select_related('user', 'product')
+
+    def perform_create(self, serializer):
+        product = get_object_or_404(Product, slug=self.kwargs['slug'])
+        if Review.objects.filter(product=product, user=self.request.user).exists():
+            raise ValidationError(
+                {'detail': 'Vous avez déjà publié un avis pour ce produit.'}
+            )
+        # l'utilisateur vient toujours du token, jamais du formulaire
+        serializer.save(user=self.request.user, product=product)
+
+
+class MyReviewsView(generics.ListAPIView):
+    """Avis publiés par l'utilisateur connecté (page profil)."""
+    serializer_class = ReviewSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return Review.objects.filter(
+            user=self.request.user
+        ).select_related('product', 'user')
 
 
 class ProductAdminViewSet(viewsets.ModelViewSet):
