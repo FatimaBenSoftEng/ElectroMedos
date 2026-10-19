@@ -14,10 +14,7 @@ import {
   Pencil,
   ChevronRight,
   Star,
-  Ticket,
-  Award,
   Undo2,
-  CreditCard,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -26,6 +23,7 @@ import { getErrorMessage } from '../services/api';
 import { useWishlist } from '../context/WishlistContext';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
+import { reviewService } from '../services/reviewService';
 import styles from './ProfilePage.module.css';
 
 const TABS = [
@@ -35,8 +33,6 @@ const TABS = [
   { id: 'favoris', label: 'Favoris', icon: Heart },
   { id: 'avis', label: 'Avis', icon: Star },
   { id: 'adresses', label: 'Adresses', icon: MapPin },
-/*   { id: 'paiement', label: 'Moyens de paiement', icon: CreditCard },
- */
   { id: 'parametres', label: 'Paramètres', icon: Settings },
 ];
 
@@ -68,6 +64,10 @@ export default function ProfilePage() {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [addingId, setAddingId] = useState(null);
 
+  // Avis publiés par l'utilisateur connecté
+  const [myReviews, setMyReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+
   // Bascule lecture / édition pour "Informations" et "Adresses"
   const [editingInfos, setEditingInfos] = useState(false);
   const [editingAddress, setEditingAddress] = useState(false);
@@ -95,6 +95,15 @@ export default function ProfilePage() {
       .then(({ data }) => setOrders(data.results || data))
       .catch((err) => notify(getErrorMessage(err), 'error'))
       .finally(() => setOrdersLoading(false));
+  }, [notify]);
+
+  useEffect(() => {
+    setReviewsLoading(true);
+    reviewService
+      .getMyReviews()
+      .then(({ data }) => setMyReviews(data.results || data))
+      .catch((err) => notify(getErrorMessage(err), 'error'))
+      .finally(() => setReviewsLoading(false));
   }, [notify]);
 
   const [form, setForm] = useState({
@@ -541,21 +550,6 @@ export default function ProfilePage() {
               </motion.div>
             )}
 
-            {/* Moyens de paiement */}
-           {/*  {activeTab === 'paiement' && (
-              <motion.div key="paiement" {...fadeSlide} className="card">
-                <div className={styles.cardHeader}>
-                  <h2>Mes moyens de paiement</h2>
-                </div>
-                <div className={styles.emptyState}>
-                  <p>Vous n'avez enregistré aucun moyen de paiement.</p>
-                  <button type="button" className="btn btn--outline">
-                    Ajouter une carte
-                  </button>
-                </div>
-              </motion.div>
-            )} */}
-
             {/* Favoris */}
             {activeTab === 'favoris' && (
               <motion.div key="favoris" {...fadeSlide} className="card">
@@ -615,14 +609,44 @@ export default function ProfilePage() {
             {activeTab === 'avis' && (
               <motion.div key="avis" {...fadeSlide} className="card">
                 <div className={styles.cardHeader}>
-                  <h2>Avis</h2>
+                  <h2>Avis ({myReviews.length})</h2>
                 </div>
-                <div className={styles.emptyState}>
-                  <p>Vous n'avez pas encore publié d'avis.</p>
-                  <Link to="/products?ordering=-created_at" className="btn btn--outline">
-                    Voir le catalogue
-                  </Link>
-                </div>
+
+                {reviewsLoading ? (
+                  <p>Chargement...</p>
+                ) : myReviews.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <p>Vous n'avez pas encore publié d'avis.</p>
+                    <Link to="/products?ordering=-created_at" className="btn btn--outline">
+                      Voir le catalogue
+                    </Link>
+                  </div>
+                ) : (
+                  <ul className={styles.orderList}>
+                    {myReviews.map((review) => (
+                      <motion.li
+                        key={review.id}
+                        className={styles.orderListItem}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                      >
+                        <div className={styles.orderListMain}>
+                          <strong>
+                            <Link to={`/products/${review.product_slug}`}>
+                              {review.product_name}
+                            </Link>
+                          </strong>
+                          <p className={styles.orderListDate}>
+                            {'★'.repeat(review.rating)}
+                            {'☆'.repeat(5 - review.rating)} · {formatDate(review.created_at)}
+                          </p>
+                          {review.title && <p><strong>{review.title}</strong></p>}
+                          {review.comment && <p>{review.comment}</p>}
+                        </div>
+                      </motion.li>
+                    ))}
+                  </ul>
+                )}
               </motion.div>
             )}
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { productService } from '../services/productService';
+import { reviewService } from '../services/reviewService';
 import { getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -9,36 +10,6 @@ import { useNotification } from '../context/NotificationContext';
 import { Loader } from '../components/common/Loader';
 import { getProductDiscount } from '../utils/productHelpers';
 import styles from './ProductDetailPage.module.css';
-
-const buildDefaultReviews = (product) => {
-  const fallbackReviews = [
-    {
-      id: 1,
-      author: 'Sofia',
-      rating: 5,
-      title: 'Excellent produit',
-      comment: 'Très bon rapport qualité/prix et livraison rapide.',
-      created_at: '2026-06-16T10:00:00Z',
-    },
-    {
-      id: 2,
-      author: 'Yassine',
-      rating: 4,
-      title: 'Satisfait',
-      comment: 'Le produit répond parfaitement à mes attentes.',
-      created_at: '2026-06-10T14:30:00Z',
-    },
-  ];
-
-  if (product?.reviews && Array.isArray(product.reviews) && product.reviews.length > 0) {
-    return product.reviews;
-  }
-
-  return fallbackReviews.map((review, index) => ({
-    ...review,
-    id: `${product?.slug || 'product'}-${index + 1}`,
-  }));
-};
 
 const formatReviewDate = (value) => {
   if (!value) return 'À l’instant';
@@ -78,8 +49,10 @@ export default function ProductDetailPage() {
   const [adding, setAdding] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewText, setReviewText] = useState('');
+  const [reviewTitle, setReviewTitle] = useState('');
   const [reviewRating, setReviewRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   const [activeImage, setActiveImage] = useState(0);
   const [added, setAdded] = useState(false);
@@ -87,22 +60,26 @@ export default function ProductDetailPage() {
   const tabsRef = useRef(null);
   const actionsRef = useRef(null);
   const addedTimer = useRef(null);
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
   const { notify } = useNotification();
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
 
+  // Charge le produit ET ses vrais avis depuis l'API
   useEffect(() => {
     setLoading(true);
     setQuantity(1);
     setActiveTab('description');
     setActiveImage(0);
-    productService
-      .getProduct(slug)
-      .then(({ data }) => {
-        setProduct(data);
-        setReviews(buildDefaultReviews(data));
+
+    Promise.all([
+      productService.getProduct(slug),
+      reviewService.getProductReviews(slug).catch(() => ({ data: [] })),
+    ])
+      .then(([{ data: productData }, { data: reviewsData }]) => {
+        setProduct(productData);
+        setReviews(reviewsData.results || reviewsData);
       })
       .catch((err) => notify(getErrorMessage(err), 'error'))
       .finally(() => setLoading(false));
@@ -148,7 +125,8 @@ export default function ProductDetailPage() {
     }
   };
 
-  const handleSubmitReview = (event) => {
+  // Publie un vrai avis via l'API
+  const handleSubmitReview = async (event) => {
     event.preventDefault();
 
     if (!isAuthenticated) {
@@ -161,19 +139,25 @@ export default function ProductDetailPage() {
       return;
     }
 
-    const newReview = {
-      id: Date.now(),
-      author: user?.username || user?.first_name || 'Client',
-      rating: reviewRating,
-      title: reviewRating >= 4 ? 'Très bon produit' : 'Produit intéressant',
-      comment: reviewText.trim(),
-      created_at: new Date().toISOString(),
-    };
-
-    setReviews((current) => [newReview, ...current]);
-    setReviewText('');
-    setReviewRating(5);
-    notify('Votre avis a bien été ajouté.', 'success');
+    setSubmitting(true);
+    try {
+      const { data } = await reviewService.createReview(slug, {
+        rating: reviewRating,
+        title: reviewTitle.trim(),
+        comment: reviewText.trim(),
+      });
+      setReviews((current) => [data, ...current]);
+      setReviewText('');
+      setReviewTitle('');
+      setReviewRating(5);
+      notify('Votre avis a bien été ajouté.', 'success');
+    } catch (err) {
+      // ex : "Vous avez déjà publié un avis pour ce produit."
+      const detail = err.response?.data?.detail;
+      notify(detail || getErrorMessage(err), 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const openReviews = () => {
@@ -186,7 +170,7 @@ export default function ProductDetailPage() {
 
   const averageRating = reviews.length
     ? (reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length).toFixed(1)
-    : '5.0';
+    : '0.0';
 
   const distribution = [5, 4, 3, 2, 1].map((star) => {
     const count = reviews.filter((r) => Math.round(Number(r.rating)) === star).length;
@@ -288,7 +272,9 @@ export default function ProductDetailPage() {
             <button type="button" className={styles.ratingRow} onClick={openReviews}>
               <Stars value={averageRating} />
               <span>{averageRating}</span>
-              <span className={styles.ratingLink}>{reviews.length} avis</span>
+              <span className={styles.ratingLink}>
+                {reviews.length > 0 ? `${reviews.length} avis` : 'Aucun avis'}
+              </span>
             </button>
 
             <p className={styles.price}>{Number(product.price).toFixed(2)} €</p>
@@ -502,6 +488,18 @@ export default function ProductDetailPage() {
                       </div>
 
                       <label className={styles.field}>
+                        <span>Titre (facultatif)</span>
+                        <input
+                          type="text"
+                          className={styles.textarea}
+                          maxLength={120}
+                          placeholder="Résumez votre avis"
+                          value={reviewTitle}
+                          onChange={(event) => setReviewTitle(event.target.value)}
+                        />
+                      </label>
+
+                      <label className={styles.field}>
                         <span>Votre commentaire</span>
                         <textarea
                           className={styles.textarea}
@@ -512,13 +510,23 @@ export default function ProductDetailPage() {
                         />
                       </label>
 
-                      <button type="submit" className={styles.submitBtn}>
-                        {isAuthenticated ? 'Publier mon avis' : 'Se connecter pour commenter'}
+                      <button type="submit" className={styles.submitBtn} disabled={submitting}>
+                        {!isAuthenticated
+                          ? 'Se connecter pour commenter'
+                          : submitting
+                            ? 'Publication...'
+                            : 'Publier mon avis'}
                       </button>
                     </form>
                   </div>
 
                   <div className={styles.reviewList}>
+                    {reviews.length === 0 && (
+                      <p className={styles.reviewText}>
+                        Aucun avis pour le moment. Soyez le premier à donner le vôtre !
+                      </p>
+                    )}
+
                     <AnimatePresence initial={false}>
                       {reviews.map((review) => (
                         <motion.article
