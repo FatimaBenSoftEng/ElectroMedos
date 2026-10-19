@@ -100,42 +100,67 @@
   align-items: center;
   justify-self: end;
   gap: 1rem;
+  white-space: nowrap;
 }
 
 .action,
 .actionButton {
   display: flex;
   align-items: center;
-  gap: .6rem;
+  gap: .45rem;
   color: #fff;
   text-decoration: none;
   background: transparent;
   border: none;
+  padding: 0;
   cursor: pointer;
   font: inherit;
+  text-align: left;
 }
 
 .action:hover,
 .actionButton:hover {
   color: var(--color-primary);
+  text-decoration: none;
 }
 
-.action svg,
-.actionButton svg {
+.action:hover .actionText strong,
+.actionButton:hover .actionText strong {
+  color: var(--color-primary);
+}
+
+/* Cible UNIQUEMENT l'icône principale (l'utilisateur) */
+.action > svg:first-child,
+.actionButton > svg:first-child {
   font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+/* Cible la flèche (chevron) et force une petite taille */
+.action .chevron,
+.actionButton .chevron {
+  font-size: 0.65rem !important; /* !important pour écraser la règle globale si besoin */
+  margin-left: 0.1rem;
+  flex-shrink: 0;
 }
 
 .actionText {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  min-width: 0;
 }
 
 .actionText strong {
+  display: block;
+  max-width: 160px;
+  overflow: hidden;
   color: #fff;
   font-size: .9rem;
   font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
 }
-
 /* ==========================
    Favoris / Panier
 ========================== */
@@ -234,7 +259,7 @@
 
     color:#333;
 
-    text-decoration:none;
+    text-decoration:none !important;
 
     font-size:15px;
 
