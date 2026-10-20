@@ -51,16 +51,12 @@ export default function Header({ categories = [] }) {
 
         {/* ================= Logo ================= */}
 
-        <Link to="/" className={styles.logo}>
+        <Link to="/" className={styles.logo} aria-label="ElectroMedos - Accueil">
           <img
-            src="/images/logo.jpg"
+            src="/images/LogoEM.png"
             alt="ElectroMedos"
             className={styles.logoImage}
           />
-
-          <span className={styles.logoText}>
-            Electro<span>Medos</span>
-          </span>
         </Link>
 
         {/* ================= Recherche ================= */}
