@@ -3,6 +3,30 @@ import { useCart } from '../context/CartContext';
 import { useNotification } from '../context/NotificationContext';
 import { getErrorMessage } from '../services/api';
 import { Loader } from '../components/common/Loader';
+import { formatPrice } from '../utils/productHelpers';
+import styles from './CartPage.module.css';
+
+function TrashIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  );
+}
 
 export default function CartPage() {
   const { cart, loading, updateItem, removeItem } = useCart();
@@ -33,7 +57,9 @@ export default function CartPage() {
         <h1 className="page__title">Panier</h1>
         <div className="empty-state card">
           <p>Votre panier est vide.</p>
-          <Link to="/products" className="btn btn--primary">Voir les produits</Link>
+          <Link to="/products" className={`btn btn--primary ${styles.pill}`}>
+            Voir les produits
+          </Link>
         </div>
       </div>
     );
@@ -55,25 +81,52 @@ export default function CartPage() {
               </div>
               <div className="cart-item__info">
                 <Link to={`/products/${item.product.slug}`}>{item.product.name}</Link>
-                <p>{Number(item.product.price).toFixed(2)} €</p>
+                <p>{formatPrice(item.product.price)}</p>
               </div>
-              <div className="quantity-control">
-                <button type="button" onClick={() => handleUpdate(item.id, item.quantity - 1)} disabled={item.quantity <= 1}>−</button>
+
+              <div className={`quantity-control ${styles.quantity}`}>
+                <button
+                  type="button"
+                  onClick={() => handleUpdate(item.id, item.quantity - 1)}
+                  disabled={item.quantity <= 1}
+                  aria-label="Diminuer la quantité"
+                >
+                  −
+                </button>
                 <span>{item.quantity}</span>
-                <button type="button" onClick={() => handleUpdate(item.id, item.quantity + 1)}>+</button>
+                <button
+                  type="button"
+                  onClick={() => handleUpdate(item.id, item.quantity + 1)}
+                  aria-label="Augmenter la quantité"
+                >
+                  +
+                </button>
               </div>
-              <p className="cart-item__subtotal">{Number(item.subtotal).toFixed(2)} €</p>
-              <button type="button" className="btn btn--ghost btn--sm" onClick={() => handleRemove(item.id)}>✕</button>
+
+              <p className="cart-item__subtotal">{formatPrice(item.subtotal)}</p>
+
+              <button
+                type="button"
+                className={`btn btn--ghost btn--sm ${styles.remove}`}
+                onClick={() => handleRemove(item.id)}
+                aria-label="Supprimer l'article"
+                title="Supprimer"
+              >
+                <TrashIcon />
+              </button>
             </div>
           ))}
         </div>
+
         <aside className="cart-summary card">
           <h2>Récapitulatif</h2>
           <div className="cart-summary__row">
             <span>Total</span>
-            <strong>{Number(cart.total).toFixed(2)} €</strong>
+            <strong>{formatPrice(cart.total)}</strong>
           </div>
-          <Link to="/checkout" className="btn btn--primary btn--full">Passer commande</Link>
+          <Link to="/checkout" className={`btn btn--primary btn--full ${styles.pill}`}>
+            Passer commande
+          </Link>
         </aside>
       </div>
     </div>

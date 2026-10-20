@@ -415,14 +415,33 @@
   font-weight: 600;
 }
 
+/* ----- Bouton "Voir détails" (remplace l'ancienne flèche) ----- */
 .orderListLink {
-  color: var(--color-text-muted);
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  gap: 0.45rem;
+  padding: 0.5rem 1rem;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 999px;
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.orderListLink:hover {
-  color: var(--color-primary);
+.orderListLink:hover,
+.orderListLink:focus,
+.orderListLink:focus-visible,
+.orderListLink:active {
+  background: var(--color-primary);
+  color: #fff;
+  text-decoration: none;
+}
+
+.orderListLink span {
+  text-decoration: none;
 }
 
 @media (max-width: 640px) {
@@ -435,6 +454,73 @@
   .orderListLink {
     grid-column: 2;
     justify-self: flex-end;
+  }
+}
+
+/* Ligne de commande : 4 blocs séparés par le MÊME espace
+   [ commande ]  [ statut ]  [ prix ]  [ bouton ] */
+.orderRow {
+  grid-template-columns: auto 120px minmax(150px, auto) auto;
+  justify-content: space-between; /* espaces égaux entre les 4 blocs */
+  column-gap: 1.5rem;             /* espace minimum si l'écran se réduit */
+}
+
+.orderRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* Le prix et le bouton deviennent des blocs de la grille */
+.orderRowRight {
+  display: contents;
+}
+
+/* Même largeur pour tous les statuts => colonnes bien alignées */
+.orderRow .badge {
+  justify-self: stretch;
+  justify-content: center;
+}
+
+.orderListTotal {
+  white-space: nowrap;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .orderRow {
+    grid-template-columns: auto 1fr;
+    justify-content: stretch;
+    align-items: center;
+    row-gap: 0.75rem;
+  }
+
+  .orderRowLeft {
+    grid-column: 1 / -1;
+  }
+
+  .orderRow .badge {
+    justify-self: start;
+    justify-content: flex-start;
+  }
+
+  .orderRowRight {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+/* Très petit écran : on garde seulement l'icône œil */
+@media (max-width: 480px) {
+  .orderListLink span {
+    display: none;
+  }
+
+  .orderListLink {
+    padding: 0.5rem;
   }
 }
 

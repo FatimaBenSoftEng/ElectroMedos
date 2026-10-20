@@ -12,7 +12,7 @@ import {
   Phone,
   Calendar,
   Pencil,
-  ChevronRight,
+  Eye,
   Star,
   Undo2,
 } from 'lucide-react';
@@ -401,32 +401,43 @@ export default function ProfilePage() {
                       return (
                         <motion.li
                           key={order.id}
-                          className={styles.orderListItem}
+                          className={`${styles.orderListItem} ${styles.orderRow}`}
                           initial={{ opacity: 0, x: -8 }}
                           animate={{ opacity: 1, x: 0 }}
                         >
-                          {thumb ? (
-                            <img src={thumb} alt="" className={styles.orderListThumb} />
-                          ) : (
-                            <div className={styles.orderListIcon}>
-                              <Package size={20} />
+                          <div className={styles.orderRowLeft}>
+                            {thumb ? (
+                              <img src={thumb} alt="" className={styles.orderListThumb} />
+                            ) : (
+                              <div className={styles.orderListIcon}>
+                                <Package size={20} />
+                              </div>
+                            )}
+                            <div className={styles.orderListMain}>
+                              <strong>Commande #{order.reference || order.id}</strong>
+                              <p className={styles.orderListDate}>
+                                Passée le {new Date(order.created_at).toLocaleDateString('fr-FR')}
+                              </p>
                             </div>
-                          )}
-                          <div className={styles.orderListMain}>
-                            <strong>Commande #{order.reference || order.id}</strong>
-                            <p className={styles.orderListDate}>
-                              Passée le {new Date(order.created_at).toLocaleDateString('fr-FR')}
-                            </p>
                           </div>
+
                           <span className={statusStyle[order.status]?.className || styles.badge}>
                             {statusStyle[order.status]?.label || order.status}
                           </span>
-                          <span className={styles.orderListTotal}>
-                            {Number(order.total).toFixed(2)} MAD
-                          </span>
-                          <Link to={`/orders/${order.id}`} className={styles.orderListLink}>
-                            <ChevronRight size={18} />
-                          </Link>
+
+                          <div className={styles.orderRowRight}>
+                            <span className={styles.orderListTotal}>
+                              {Number(order.total).toFixed(2)} MAD
+                            </span>
+                            <Link
+                              to={`/orders/${order.id}`}
+                              className={styles.orderListLink}
+                              aria-label={`Voir les détails de la commande ${order.reference || order.id}`}
+                            >
+                              {/* <Eye size={16} /> */}
+                              <span>Voir détails</span>
+                            </Link>
+                          </div>
                         </motion.li>
                       );
                     })}
@@ -443,7 +454,7 @@ export default function ProfilePage() {
                 </div>
                 <div className={styles.emptyState}>
                   <p>Vous n'avez aucune demande de retour en cours.</p>
-                  <Link to="/orders" className="btn btn--outline">
+                  <Link to="/profile?tab=commandes" className="btn btn--outline">
                     Voir mes commandes
                   </Link>
                 </div>
