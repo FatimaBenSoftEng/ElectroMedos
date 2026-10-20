@@ -1,5 +1,12 @@
+export const CURRENCY = 'MAD';
+
 export function formatPrice(value) {
-  return `${Number(value).toFixed(2)} €`;
+  const amount = Number(value || 0).toLocaleString('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  // \u00A0 = espace insécable : le nombre et MAD ne sont jamais séparés
+  return `${amount}\u00A0${CURRENCY}`;
 }
 
 export function getProductDiscount(product) {

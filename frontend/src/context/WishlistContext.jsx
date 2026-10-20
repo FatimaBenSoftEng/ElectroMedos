@@ -5,10 +5,11 @@ const STORAGE_PREFIX = 'electromedos_wishlist';
 const WishlistContext = createContext(null);
 
 // Une clé par utilisateur : electromedos_wishlist_12, electromedos_wishlist_13...
-// Sans utilisateur connecté, on utilise la clé « guest ».
-const storageKey = (userId) => `${STORAGE_PREFIX}_${userId ?? 'guest'}`;
+const storageKey = (userId) => `${STORAGE_PREFIX}_${userId}`;
 
+// Pas d'utilisateur connecté = pas de liste enregistrée (liste vide)
 function loadWishlist(userId) {
+  if (userId === null || userId === undefined) return [];
   try {
     const raw = localStorage.getItem(storageKey(userId));
     return raw ? JSON.parse(raw) : [];
@@ -18,8 +19,11 @@ function loadWishlist(userId) {
 }
 
 export function WishlistProvider({ children }) {
-  const { user } = useAuth();
-  const userId = user?.id ?? null;
+  const { user, isAuthenticated } = useAuth();
+  // Identifiant du propriétaire de la liste. Déconnecté : null.
+  const userId = isAuthenticated
+    ? (user?.id ?? user?.pk ?? user?.username ?? user?.email ?? null)
+    : null;
 
   // L'état garde l'identifiant du propriétaire de la liste
   const [state, setState] = useState(() => ({
@@ -35,8 +39,9 @@ export function WishlistProvider({ children }) {
 
   const items = state.userId === userId ? state.items : [];
 
-  // Sauvegarde dans la clé du bon utilisateur
+  // Sauvegarde dans la clé du bon utilisateur (jamais pour un visiteur)
   useEffect(() => {
+    if (state.userId === null) return;
     try {
       localStorage.setItem(storageKey(state.userId), JSON.stringify(state.items));
     } catch {

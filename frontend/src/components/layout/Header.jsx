@@ -121,7 +121,7 @@ export default function Header({ categories = [] }) {
                 <strong>Se connecter</strong>
               </div>
 
-              <FiChevronDown style={chevronStyle(false)} />
+              <FiChevronDown className={styles.chevron} style={chevronStyle(false)} />
             </Link>
           ) : (
 
@@ -145,7 +145,7 @@ export default function Header({ categories = [] }) {
                   </strong>
                 </div>
 
-                <FiChevronDown style={chevronStyle(menuOpen)} />
+                <FiChevronDown className={styles.chevron} style={chevronStyle(menuOpen)} />
               </button>
 
               <div className={styles.dropdown}>
@@ -196,7 +196,7 @@ export default function Header({ categories = [] }) {
           >
             <FiHeart />
 
-            {wishlistCount > 0 && (
+            {isAuthenticated && wishlistCount > 0 && (
               <span className={styles.badge}>
                 {wishlistCount}
               </span>
