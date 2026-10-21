@@ -8,10 +8,8 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={`container ${styles.grid}`}>
         <div className={styles.column}>
-          <Link to="/" className={styles.logo}>
-            <img src="/images/logo.jpg" alt="Electromedos" className={styles.logoImage} />
-            <span className={styles.logoElectro}>Electro</span>
-            <span className={styles.logoMedos}>Medos</span>
+          <Link to="/" className={styles.logo} aria-label="ElectroMedos - Accueil">
+            <img src="/images/LogoEM.png" alt="ElectroMedos" className={styles.logoImage} />
           </Link>
           <p className={styles.desc}>
             Votre boutique en ligne d'électronique. Qualité, prix compétitifs et livraison rapide partout au Maroc.
@@ -38,7 +36,7 @@ export default function Footer() {
           <h4>Mon compte</h4>
           <Link to="/login">Connexion</Link>
           <Link to="/register">Inscription</Link>
-          <Link to="/orders">Mes commandes</Link>
+          <Link to="/profile?tab=commandes">Mes commandes</Link>
           <Link to="/profile">Mon profil</Link>
         </div>
 

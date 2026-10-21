@@ -113,11 +113,13 @@ linear-gradient(135deg, rgba(30, 27, 75, 0.85) 0%, rgba(79, 70, 229, 0.75) 100%)
   padding-top: 40px;
 }
 
+/* ===== Logo (sans animation) ===== */
 .glowCircle {
-  width: 260px;
-  height: 260px;
+  width: 280px;
+  height: 280px;
+  padding: 14px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4f46e5, #a855f7);
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
   box-shadow: 0 0 80px rgba(139, 92, 246, 0.45);
   display: flex;
   align-items: center;
@@ -126,11 +128,25 @@ linear-gradient(135deg, rgba(30, 27, 75, 0.85) 0%, rgba(79, 70, 229, 0.75) 100%)
   position: relative;
 }
 
+/* Anneau dégradé fixe autour du cercle */
+.glowCircle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 4px;
+  background: conic-gradient(#4f46e5, #a855f7, #22d3ee, #4f46e5);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
 .glowLogo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
+  object-fit: contain; /* le logo n'est plus coupé */
+  border-radius: 0;
+  transform: translateY(4px); /* centre le logo verticalement */
 }
 
 /* ===== Values ===== */

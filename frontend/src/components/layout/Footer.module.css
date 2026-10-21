@@ -60,43 +60,34 @@
   color: var(--color-white);
 }
 
+/* ==========================
+   Logo (position absolute)
+========================== */
 .logo {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  flex-wrap: nowrap !important;
-  gap: 0.3rem;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--color-white);
+  position: relative;
+  display: block;
+  height: 63px;        /* ~12px en haut + logo + ~4px en bas */
+  width: 280px;        /* assez large pour ne pas couper le logo */
+  margin-bottom: 0;
+  overflow: hidden;    /* empêche le débordement de l'image */
   text-decoration: none;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
 }
 
 .logoImage {
-  display: block !important;
-  width: 32px !important;
-  height: 32px !important;
+  position: absolute;
+  top: 46px;           /* ↑ plus grand = logo plus bas (plus d'espace en haut) */
+  left: -15px;         /* compense la marge transparente à gauche */
+  height: 150px;
+  width: auto;
   object-fit: contain;
-  border-radius: 0.5rem;
-  background: var(--color-white);
-  flex-shrink: 0;
-}
-
-.logoElectro {
-  color: var(--color-white);
-  margin-right: -0.15rem;
-}
-
-.logoMedos {
-  color: var(--color-primary);
+  transform: translateY(-50%);
 }
 
 .desc {
   font-size: 0.9rem;
-  line-height: 1.7;
+  line-height: 1.6;
   margin-bottom: 1.25rem;
+  margin-top: 0;
   color: var(--color-white-muted) !important;
   text-decoration: none !important;
 }
@@ -151,5 +142,16 @@
   .grid {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  .logo {
+    height: 51px;
+    width: 230px;
+  }
+
+  .logoImage {
+    height: 120px;
+    top: 37px;
+    left: -12px;
   }
 }

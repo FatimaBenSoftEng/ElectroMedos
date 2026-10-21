@@ -107,7 +107,7 @@ export default function AboutPage() {
           className={styles.missionVisual}
         >
           <div className={styles.glowCircle}>
-            <img src="/logo.jpg" alt="ElectroMedos" className={styles.glowLogo} />
+            <img src="/images/LogoEM.png" alt="ElectroMedos" className={styles.glowLogo} />
           </div>
         </motion.div>
       </section>
