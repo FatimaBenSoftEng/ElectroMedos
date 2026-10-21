@@ -4,47 +4,83 @@
   padding-bottom: 3rem;
 }
 
-/* ----- Retour ----- */
-.back {
-  display: inline-flex;
+/* ----- Barre d'actions (retour / imprimer) ----- */
+.toolbar {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1.25rem;
-  padding: 0.5rem 0.9rem 0.5rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-decoration: none;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
 }
 
-.back:hover,
-.back:focus-visible {
-  background: var(--color-primary-light, rgba(91, 78, 245, 0.1));
-  color: var(--color-primary);
+/* ----- Boutons / liens d'action (style commun) ----- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-white);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-dark);
   text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-primary-light, rgba(91, 78, 245, 0.08));
+  text-decoration: none;
+}
+
+.btnPrimary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.btnPrimary:hover,
+.btnPrimary:focus-visible {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(91, 78, 245, 0.3);
+}
+
+.btnBlock {
+  width: 100%;
 }
 
 /* ----- En-tête ----- */
 .header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
 .title {
-  margin: 0 0 0.3rem;
+  margin: 0;
   font-size: 2rem;
   line-height: 1.15;
   color: var(--color-dark);
 }
 
 .date {
-  margin: 0;
+  margin: 0.4rem 0 0;
   color: var(--color-text-muted);
   font-size: 0.95rem;
 }
@@ -110,8 +146,17 @@
 }
 
 .aside {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   position: sticky;
   top: 1.5rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 @media (max-width: 960px) {
@@ -412,5 +457,17 @@ a.itemMain:hover .itemName {
 
   .itemSubtotal {
     align-self: flex-end;
+  }
+}
+
+/* ===== Impression : on masque les boutons ===== */
+@media print {
+  .toolbar,
+  .actionsCard {
+    display: none;
+  }
+
+  .aside {
+    position: static;
   }
 }

@@ -304,7 +304,7 @@ linear-gradient(135deg, rgba(30, 27, 75, 0.85) 0%, rgba(79, 70, 229, 0.75) 100%)
   font-weight: 700;
   padding: 14px 36px;
   border-radius: 999px;
-  text-decoration: none;
+  text-decoration: none !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 

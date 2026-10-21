@@ -12,6 +12,9 @@ import {
   User,
   StickyNote,
   XCircle,
+  Printer,
+  ShoppingBag,
+  MessageCircle,
 } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { getErrorMessage } from '../services/api';
@@ -19,13 +22,13 @@ import { useNotification } from '../context/NotificationContext';
 import { Loader } from '../components/common/Loader';
 import styles from './OrderDetailPage.module.css';
 
-const STATUS_LABELS = {
+/* const STATUS_LABELS = {
   pending: 'En attente',
   processing: 'En préparation',
   shipped: 'Expédiée',
   delivered: 'Livrée',
   cancelled: 'Annulée',
-};
+}; */
 
 const BADGE_CLASS = {
   pending: styles.badgeWarning,
@@ -78,26 +81,33 @@ export default function OrderDetailPage() {
 
   return (
     <div className={`container page ${styles.page}`}>
-      <Link to="/profile?tab=commandes" className={styles.back}>
-        <ArrowLeft size={18} />
-        Retour à mes commandes
-      </Link>
+      {/* ===== Barre d'actions : retour à gauche, imprimer à droite ===== */}
+      <div className={styles.toolbar}>
+        <Link to="/profile?tab=commandes" className={styles.btn}>
+          <ArrowLeft size={18} />
+          Retour à mes commandes
+        </Link>
+       {/*  <button type="button" className={styles.btn} onClick={() => window.print()}>
+          <Printer size={18} />
+          Imprimer
+        </button> */}
+      </div>
 
-      {/* ===== En-tête ===== */}
+      {/* ===== En-tête : titre + statut côte à côte ===== */}
       <header className={styles.header}>
-        <div>
+        <div className={styles.titleRow}>
           <h1 className={styles.title}>Commande #{order.reference || order.id}</h1>
-          <p className={styles.date}>
-            Passée le{' '}
-            {new Date(order.created_at).toLocaleString('fr-FR', {
-              dateStyle: 'long',
-              timeStyle: 'short',
-            })}
-          </p>
+         {/*  <span className={`${styles.badge} ${BADGE_CLASS[order.status] || ''}`}>
+            {STATUS_LABELS[order.status] || order.status}
+          </span> */}
         </div>
-        <span className={`${styles.badge} ${BADGE_CLASS[order.status] || ''}`}>
-          {STATUS_LABELS[order.status] || order.status}
-        </span>
+        <p className={styles.date}>
+          Passée le{' '}
+          {new Date(order.created_at).toLocaleString('fr-FR', {
+            dateStyle: 'long',
+            timeStyle: 'short',
+          })}
+        </p>
       </header>
 
       {/* ===== Suivi de commande ===== */}
@@ -136,7 +146,7 @@ export default function OrderDetailPage() {
       </section>
 
       <div className={styles.layout}>
-        {/* ===== Articles ===== */}
+        {/* ===== Colonne gauche : Articles ===== */}
         <section className={styles.card}>
           <h2 className={styles.cardTitle}>
             Articles <span className={styles.count}>({itemsCount})</span>
@@ -202,49 +212,65 @@ export default function OrderDetailPage() {
           </dl>
         </section>
 
-        {/* ===== Livraison ===== */}
-        <aside className={`${styles.card} ${styles.aside}`}>
-          <h2 className={styles.cardTitle}>Livraison</h2>
+        {/* ===== Colonne droite : Livraison + Actions ===== */}
+        <aside className={styles.aside}>
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Livraison</h2>
 
-          <ul className={styles.infoList}>
-            <li>
-              <User size={18} className={styles.infoIcon} />
-              <span>{fullName || '—'}</span>
-            </li>
-            <li>
-              <MapPin size={18} className={styles.infoIcon} />
-              <span>
-                {order.address}
-                <br />
-                {[order.postal_code, order.city].filter(Boolean).join(' ')}
-                {order.country && (
-                  <>
-                    <br />
-                    {order.country}
-                  </>
-                )}
-              </span>
-            </li>
-            {order.email && (
+            <ul className={styles.infoList}>
               <li>
-                <Mail size={18} className={styles.infoIcon} />
-                <a href={`mailto:${order.email}`}>{order.email}</a>
+                <User size={18} className={styles.infoIcon} />
+                <span>{fullName || '—'}</span>
               </li>
-            )}
-            {order.phone && (
               <li>
-                <Phone size={18} className={styles.infoIcon} />
-                <a href={`tel:${order.phone}`}>{order.phone}</a>
+                <MapPin size={18} className={styles.infoIcon} />
+                <span>
+                  {order.address}
+                  <br />
+                  {[order.postal_code, order.city].filter(Boolean).join(' ')}
+                  {order.country && (
+                    <>
+                      <br />
+                      {order.country}
+                    </>
+                  )}
+                </span>
               </li>
-            )}
-          </ul>
+              {order.email && (
+                <li>
+                  <Mail size={18} className={styles.infoIcon} />
+                  <a href={`mailto:${order.email}`}>{order.email}</a>
+                </li>
+              )}
+              {order.phone && (
+                <li>
+                  <Phone size={18} className={styles.infoIcon} />
+                  <a href={`tel:${order.phone}`}>{order.phone}</a>
+                </li>
+              )}
+            </ul>
 
-          {order.notes && (
-            <div className={styles.notes}>
-              <StickyNote size={16} />
-              <p>{order.notes}</p>
+            {order.notes && (
+              <div className={styles.notes}>
+                <StickyNote size={16} />
+                <p>{order.notes}</p>
+              </div>
+            )}
+          </section>
+
+          <section className={`${styles.card} ${styles.actionsCard}`}>
+            <h2 className={styles.cardTitle}>Besoin d'aide ?</h2>
+            <div className={styles.actions}>
+              <Link to="/contact" className={`${styles.btn} ${styles.btnBlock}`}>
+                <MessageCircle size={18} />
+                Contactez-nous
+              </Link>
+              <Link to="/products" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnBlock}`}>
+                <ShoppingBag size={18} />
+                Continuer mes achats
+              </Link>
             </div>
-          )}
+          </section>
         </aside>
       </div>
     </div>
